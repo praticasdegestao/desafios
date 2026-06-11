@@ -1,0 +1,853 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Cobertura DIs — PDE Embrapa</title>
+<style>
+:root{--verde:#2E7D32;--azul:#1565C0;--cinza:#37474F;--cmedio:#607D8B;--cclaro:#ECEFF1;--sombra:0 2px 8px rgba(0,0,0,.15);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#F5F7FA;color:var(--cinza);font-size:11px;}
+.capa{background:linear-gradient(135deg,var(--verde) 0%,var(--azul) 100%);color:white;padding:50px 70px;position:relative;overflow:hidden;}
+.capa::after{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.06);}
+.capa-logo{font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;opacity:.85;margin-bottom:16px;}
+.capa-titulo{font-size:26px;font-weight:700;line-height:1.3;margin-bottom:10px;}
+.capa-subtitulo{font-size:13px;opacity:.85;margin-bottom:24px;max-width:700px;line-height:1.5;}
+.capa-meta{display:flex;gap:36px;font-size:11px;opacity:.75;flex-wrap:wrap;}
+.main{padding:30px 50px;max-width:1500px;margin:0 auto;}
+.resumo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:28px 0;}
+.card-stat{background:white;border-radius:10px;padding:20px;text-align:center;box-shadow:var(--sombra);}
+.card-stat .numero{font-size:34px;font-weight:800;line-height:1;margin-bottom:5px;}
+.card-stat .label{font-size:10.5px;color:var(--cmedio);line-height:1.4;}
+.card-stat.azul .numero{color:#1976D2;}.card-stat.verde .numero{color:#388E3C;}
+.card-stat.amarelo .numero{color:#F57F17;}.card-stat.roxo .numero{color:#6A1B9A;}
+.legenda-box{background:white;border-radius:10px;padding:16px 24px;margin-bottom:28px;box-shadow:var(--sombra);display:flex;flex-wrap:wrap;gap:18px;align-items:center;}
+.legenda-titulo{font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:1px;}
+.legenda-item{display:flex;align-items:center;gap:7px;font-size:10.5px;}
+.legenda-cor{width:24px;height:24px;border-radius:5px;border:1px solid rgba(0,0,0,.1);font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.sim{background:#C8E6C9;color:#1B5E20;}.lacuna{background:#FFCDD2;color:#B71C1C;}.parcial{background:#FFF9C4;color:#F57F17;}
+.secao{background:white;border-radius:12px;box-shadow:var(--sombra);margin-bottom:32px;overflow:hidden;}
+.secao-header{padding:16px 24px;display:flex;align-items:flex-start;gap:14px;}
+.secao-header.oe8{background:linear-gradient(90deg,#1565C0,#1976D2);}.secao-header.oe9v1{background:linear-gradient(90deg,#2E7D32,#388E3C);}
+.secao-header.oe9v2{background:linear-gradient(90deg,#6A1B9A,#8E24AA);}.secao-header.oe9v3{background:linear-gradient(90deg,#E65100,#F4511E);}
+.secao-badge{background:rgba(255,255,255,.25);color:white;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;margin-top:2px;}
+.secao-titulo-grupo{color:white;}.secao-titulo{font-size:14px;font-weight:700;margin-bottom:3px;}.secao-desc{font-size:10px;opacity:.85;line-height:1.4;}
+.tabela-container{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+.criterio-header{text-align:center;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.5px;padding:7px 4px;border-bottom:2px solid rgba(0,0,0,.1);}
+.criterio-oe{background:#E3F2FD;color:#0D47A1;}.criterio-mp{background:#E8F5E9;color:#1B5E20;}
+thead th{padding:7px 5px;font-size:9px;font-weight:600;text-align:center;border-right:1px solid #E0E0E0;border-bottom:2px solid #BDBDBD;vertical-align:bottom;line-height:1.3;min-width:65px;}
+thead th.col-di{text-align:left;background:var(--cclaro);color:var(--cinza);min-width:280px;padding-left:14px;font-size:10px;}
+thead th.col-oe{background:#DCEEFB;color:#0D47A1;}thead th.col-mp{background:#DDEFDD;color:#1B5E20;}
+tbody tr:hover{background:#FAFAFA;}tbody tr.di-row{border-bottom:1px solid #EEE;}
+td{padding:9px 5px;border-right:1px solid #EEE;vertical-align:top;text-align:center;}
+td.col-di{text-align:left;padding:10px 14px;font-size:10px;line-height:1.5;min-width:280px;max-width:360px;border-right:2px solid #BDBDBD;}
+td.col-di strong{font-size:10.5px;display:block;margin-bottom:2px;color:#212121;}
+td.col-di small{color:var(--cmedio);display:block;font-size:9px;margin-top:2px;}
+.cell-sim{background:#C8E6C9;border-radius:4px;font-weight:700;font-size:13px;color:#1B5E20;display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;}
+.cell-lacuna{background:#FFCDD2;border-radius:4px;font-weight:700;font-size:13px;color:#B71C1C;display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;}
+.cell-parcial{background:#FFF9C4;border-radius:4px;font-weight:700;font-size:12px;color:#F57F17;display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;}
+.sep-col{width:4px;background:#90A4AE;padding:0!important;border:none!important;}
+.titulo-cobertura{font-size:16px;font-weight:700;color:var(--cinza);margin:28px 0 14px 0;padding-bottom:9px;border-bottom:3px solid var(--verde);display:flex;align-items:center;gap:9px;}
+.numero-di{display:inline-block;background:var(--cinza);color:white;font-size:9px;font-weight:700;border-radius:12px;padding:2px 8px;margin-right:4px;}
+.secao-break{break-before:page;page-break-before:always;}
+.rodape{text-align:center;color:var(--cmedio);font-size:10px;padding:22px;border-top:1px solid #E0E0E0;margin-top:16px;}
+</style></head><body>
+<div class="capa">
+  <div class="capa-logo">🌿 Embrapa · PDE — Plano Diretor Estratégico</div>
+  <div class="capa-titulo">Cobertura dos Desafios de Inovação (DIs)<br>por Objetivos Específicos e Macroprocessos</div>
+  <div class="capa-subtitulo">Análise semântica da aderência e lacunas dos 28 Desafios de Inovação mapeados (OE8 e OE9) frente aos Objetivos Específicos do PDE e aos Macroprocessos Organizacionais da Embrapa. Qualquer abordagem temática — direta ou indireta — configura cobertura.</div>
+  <div class="capa-meta">
+    <span>📅 Dados: 08/05/2026</span>
+    <span>📊 28 Desafios de Inovação</span>
+    <span>🎯 15 OEs · 13 Macroprocessos</span>
+    <span>📈 Cobertura Global: 62.1%</span>
+    <span>🔍 Critério: Aderência Semântica</span>
+  </div>
+</div>
+<div class="main">
+  <div class="resumo-grid">
+    <div class="card-stat azul"><div class="numero">28</div><div class="label">Desafios de Inovação analisados (OE8 e OE9)</div></div>
+    <div class="card-stat verde"><div class="numero">68%</div><div class="label">Aderência média aos Objetivos Específicos do PDE</div></div>
+    <div class="card-stat roxo"><div class="numero">55%</div><div class="label">Aderência média aos Macroprocessos Organizacionais</div></div>
+    <div class="card-stat amarelo"><div class="numero">62.1%</div><div class="label">Cobertura global combinada OEs + Macroprocessos</div></div>
+  </div>
+  <div class="legenda-box">
+    <span class="legenda-titulo">Legenda:</span>
+    <div class="legenda-item"><div class="legenda-cor sim">✔</div><span><strong>Coberto</strong> — DI aborda o tema direta ou indiretamente</span></div>
+    <div class="legenda-item"><div class="legenda-cor parcial">~</div><span><strong>Parcial</strong> — menção muito periférica ao tema</span></div>
+    <div class="legenda-item"><div class="legenda-cor lacuna">–</div><span><strong>Lacuna</strong> — sem relação temática com o OE ou Macroprocesso</span></div>
+    <div style="margin-left:auto;font-size:10px;color:var(--cmedio);">Badges por DI: 🟢≥60% · 🟡40–59% · 🔴&lt;40%</div>
+  </div>
+  <div class="">
+  <div class="titulo-cobertura">📘 Transformação Digital</div>
+  <div class="secao">
+    <div class="secao-header oe8">
+      <div><span class="secao-badge">OE 08</span></div>
+      <div class="secao-titulo-grupo">
+        <div class="secao-titulo">Transformação Digital</div>
+        <div class="secao-desc">Ampliar a transformação digital na Embrapa a partir da governança de dados e da tecnologia da informação, aumentando a capacidade colaborativa dos empregados nos processos de geração, compartilhamento e uso do conhecimento na era digital.</div>
+      </div>
+    </div>
+    <div class="tabela-container">
+    <table><thead>
+      <tr>
+        <th rowspan="2" class="col-di" style="text-align:left;vertical-align:middle;">Desafio de Inovação (DI)</th>
+        <th colspan="15" class="criterio-header criterio-oe">Critério 1 — Objetivos Específicos do PDE</th>
+        <th class="sep-col" rowspan="2"></th>
+        <th colspan="13" class="criterio-header criterio-mp">Critério 2 — Macroprocessos Organizacionais</th>
+      </tr><tr><th class="col-oe">Transform. Digital</th><th class="col-oe">Valoriz. Pessoas</th><th class="col-oe">Plataformas Colab.</th><th class="col-oe">Redes de Inovação</th><th class="col-oe">Parcerias/Negócios</th><th class="col-oe">Racionaliz. Custos</th><th class="col-oe">Relac. Estratégicos</th><th class="col-oe">Conformidade/Rastreab.</th><th class="col-oe">Excelência SP</th><th class="col-oe">Sustentab. Institucional</th><th class="col-oe">Agilidade PD&I</th><th class="col-oe">Melhoria Processos</th><th class="col-oe">Comunicação Inst.</th><th class="col-oe">Captação Ativos</th><th class="col-oe">Fontes Alt. Tesouro</th><th class="col-mp">Negócios e TT</th><th class="col-mp">Gestão Pessoas</th><th class="col-mp">Comunicação/Mkt</th><th class="col-mp">Suprimentos/Log.</th><th class="col-mp">Digital Interno</th><th class="col-mp">Gestão P&D</th><th class="col-mp">Financeiro/Capt.</th><th class="col-mp">Infraestr. Física</th><th class="col-mp">Relações Inst.</th><th class="col-mp">Riscos/Compliance</th><th class="col-mp">Governança/Proc.</th><th class="col-mp">Intel. Estratégica</th><th class="col-mp">Articulação Intern.</th></tr></thead><tbody><tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-01</span>
+        <strong>Governança e integração de dados corporativos e científicos</strong>
+        <small>Ampliar a integração, padronização e governança dos dados corporativos e científicos para fortalecer o reuso, a geração de inteligência analítica, a pesquisa ci…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">67%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">54%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-02</span>
+        <strong>Modernização da infraestrutura tecnológica e cibersegurança</strong>
+        <small>Ampliar a capacidade tecnológica institucional e a cibersegurança por meio da modernização, integração e padronização da infraestrutura computacional, conectivi…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">53%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-03</span>
+        <strong>Inteligência Artificial aplicada à PD&I e Desenvolvimento Institucional</strong>
+        <small>Ampliar a capacidade institucional de utilização de inteligência artificial aplicada ao suporte à PD&I e ao Desenvolvimento Institucional.</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">93%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">92%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-04</span>
+        <strong>Capacidades humanas e digitais para transformação organizacional</strong>
+        <small>Desenvolver capacidades humanas e digitais, fortalecendo lideranças digitais, novas práticas de trabalho e modelos organizacionais orientados à inovação, colabo…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">67%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-05</span>
+        <strong>Governança corporativa de dados, informação e conhecimento orientada a impacto</strong>
+        <small>Estabelecer governança corporativa de dados, informação e conhecimento orientada a impacto, aprimorando integridade, qualidade e segurança ao longo do ciclo de …</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">80%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">62%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr></tbody></table>
+    </div>
+  </div>
+</div><div class="secao-break">
+  <div class="titulo-cobertura">🌿 Excelência Operacional, Governança e Sustentabilidade</div>
+  <div class="secao">
+    <div class="secao-header oe9v1">
+      <div><span class="secao-badge">OE9 · V1</span></div>
+      <div class="secao-titulo-grupo">
+        <div class="secao-titulo">Excelência Operacional, Governança e Sustentabilidade</div>
+        <div class="secao-desc">Promover a constante otimização da estrutura organizacional e de processos, além da adesão a requisitos de qualidade e de práticas sustentáveis, garantindo uma estrutura organizacional e de custos adequada.</div>
+      </div>
+    </div>
+    <div class="tabela-container">
+    <table><thead>
+      <tr>
+        <th rowspan="2" class="col-di" style="text-align:left;vertical-align:middle;">Desafio de Inovação (DI)</th>
+        <th colspan="15" class="criterio-header criterio-oe">Critério 1 — Objetivos Específicos do PDE</th>
+        <th class="sep-col" rowspan="2"></th>
+        <th colspan="13" class="criterio-header criterio-mp">Critério 2 — Macroprocessos Organizacionais</th>
+      </tr><tr><th class="col-oe">Transform. Digital</th><th class="col-oe">Valoriz. Pessoas</th><th class="col-oe">Plataformas Colab.</th><th class="col-oe">Redes de Inovação</th><th class="col-oe">Parcerias/Negócios</th><th class="col-oe">Racionaliz. Custos</th><th class="col-oe">Relac. Estratégicos</th><th class="col-oe">Conformidade/Rastreab.</th><th class="col-oe">Excelência SP</th><th class="col-oe">Sustentab. Institucional</th><th class="col-oe">Agilidade PD&I</th><th class="col-oe">Melhoria Processos</th><th class="col-oe">Comunicação Inst.</th><th class="col-oe">Captação Ativos</th><th class="col-oe">Fontes Alt. Tesouro</th><th class="col-mp">Negócios e TT</th><th class="col-mp">Gestão Pessoas</th><th class="col-mp">Comunicação/Mkt</th><th class="col-mp">Suprimentos/Log.</th><th class="col-mp">Digital Interno</th><th class="col-mp">Gestão P&D</th><th class="col-mp">Financeiro/Capt.</th><th class="col-mp">Infraestr. Física</th><th class="col-mp">Relações Inst.</th><th class="col-mp">Riscos/Compliance</th><th class="col-mp">Governança/Proc.</th><th class="col-mp">Intel. Estratégica</th><th class="col-mp">Articulação Intern.</th></tr></thead><tbody><tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-06</span>
+        <strong>Mapeamento, padronização e melhoria contínua de processos</strong>
+        <small>Implementar o mapeamento, padronização e melhoria contínua de processos de gestão administrativa, de pesquisa e de inovação para eliminar redundâncias e ampliar…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">60%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">62%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-07</span>
+        <strong>Requisitos de Qualidade, princípios ASG e ODS</strong>
+        <small>Consolidar a implementação e o fortalecimento da adoção de Requisitos de Qualidade, princípios ASG (ambiental, social e de governança), e contribuições aos ODSs…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">80%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">92%</span></span>
+        </div>
+      </td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-08</span>
+        <strong>Racionalização de custos e aumento de eficiência institucional</strong>
+        <small>Desenvolver, adaptar ou adotar novas tecnologias, práticas ou processos que levem à racionalização dos custos e/ou aumento da eficiência na Embrapa.</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">53%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-09</span>
+        <strong>Cultura de gestão de riscos e ecossistema de integridade</strong>
+        <small>Institucionalizar a gestão integrada de riscos e ecossistema de integridade, modernizando a conformidade para um modelo educativo e preventivo e estabelecendo d…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">53%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">69%</span></span>
+        </div>
+      </td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td></tr></tbody></table>
+    </div>
+  </div>
+</div><div class="secao-break">
+  <div class="titulo-cobertura">🤝 Externa: Mercado, Negócios e Ecossistemas de Inovação</div>
+  <div class="secao">
+    <div class="secao-header oe9v2">
+      <div><span class="secao-badge">OE9 · V2</span></div>
+      <div class="secao-titulo-grupo">
+        <div class="secao-titulo">Externa: Mercado, Negócios e Ecossistemas de Inovação</div>
+        <div class="secao-desc">Estabelecer ambientes promotores de inovação, novos modelos de parcerias, negócios e transferência de tecnologia baseados na co-criação, visando o intercâmbio de conhecimento e a atração de investimentos.</div>
+      </div>
+    </div>
+    <div class="tabela-container">
+    <table><thead>
+      <tr>
+        <th rowspan="2" class="col-di" style="text-align:left;vertical-align:middle;">Desafio de Inovação (DI)</th>
+        <th colspan="15" class="criterio-header criterio-oe">Critério 1 — Objetivos Específicos do PDE</th>
+        <th class="sep-col" rowspan="2"></th>
+        <th colspan="13" class="criterio-header criterio-mp">Critério 2 — Macroprocessos Organizacionais</th>
+      </tr><tr><th class="col-oe">Transform. Digital</th><th class="col-oe">Valoriz. Pessoas</th><th class="col-oe">Plataformas Colab.</th><th class="col-oe">Redes de Inovação</th><th class="col-oe">Parcerias/Negócios</th><th class="col-oe">Racionaliz. Custos</th><th class="col-oe">Relac. Estratégicos</th><th class="col-oe">Conformidade/Rastreab.</th><th class="col-oe">Excelência SP</th><th class="col-oe">Sustentab. Institucional</th><th class="col-oe">Agilidade PD&I</th><th class="col-oe">Melhoria Processos</th><th class="col-oe">Comunicação Inst.</th><th class="col-oe">Captação Ativos</th><th class="col-oe">Fontes Alt. Tesouro</th><th class="col-mp">Negócios e TT</th><th class="col-mp">Gestão Pessoas</th><th class="col-mp">Comunicação/Mkt</th><th class="col-mp">Suprimentos/Log.</th><th class="col-mp">Digital Interno</th><th class="col-mp">Gestão P&D</th><th class="col-mp">Financeiro/Capt.</th><th class="col-mp">Infraestr. Física</th><th class="col-mp">Relações Inst.</th><th class="col-mp">Riscos/Compliance</th><th class="col-mp">Governança/Proc.</th><th class="col-mp">Intel. Estratégica</th><th class="col-mp">Articulação Intern.</th></tr></thead><tbody><tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-10</span>
+        <strong>Prospecção tecnológica, foresight e plataformas corporativas de CRM</strong>
+        <small>Estruturar uma capacidade institucional integrada de prospecção tecnológica, foresight e antecipação de demandas, viabilizando plataformas corporativas de relac…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">80%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">69%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-11</span>
+        <strong>Modelos inovadores para agilidade na criação e captação de recursos</strong>
+        <small>Fomentar a criação e compartilhamento de modelos inovadores que contribuam com a agilidade na criação e disponibilização das soluções desenvolvidas e a captação…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">93%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">77%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-12</span>
+        <strong>Inserção em ecossistemas de inovação e escalagem de soluções</strong>
+        <small>Fortalecer a inserção da Embrapa em ecossistemas de inovação, ampliando a capacidade institucional de desenvolver, validar e escalar soluções que respondam aos …</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">87%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">77%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-13</span>
+        <strong>Modelos organizacionais para territórios de vulnerabilidade</strong>
+        <small>Sistematizar e validar modelos organizacionais e normativos específicos para a atuação em territórios de vulnerabilidade, integrando agroecologia, bioeconomia e…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">80%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">62%</span></span>
+        </div>
+      </td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-14</span>
+        <strong>Análise crítica das práticas de pesquisa e gestão</strong>
+        <small>Estabelecer processos contínuos de análise crítica das práticas de pesquisa e gestão, permitindo que a Embrapa adapte seus métodos e instrumentos de forma dinâm…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">73%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-15</span>
+        <strong>Aprendizagem Reflexiva e sandboxes organizacionais</strong>
+        <small>Implementar a Aprendizagem Reflexiva como prática transversal, criando ambientes de experimentação (sandboxes organizacionais) com governança ágil.</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">60%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-16</span>
+        <strong>Modelos de negócio sociais baseados em cadeias curtas</strong>
+        <small>Desenvolver modelos de negócio sociais e solidários baseados em cadeias curtas e nas economias de escopo territoriais, reduzindo custos de transação e aumentand…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">87%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">62%</span></span>
+        </div>
+      </td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-17</span>
+        <strong>Governança flexível e sandboxes para soluções organizacionais</strong>
+        <small>Institucionalizar modelos de governança flexíveis e ambientes de experimentação (sandboxes) que permitam testar e escalar soluções organizacionais transformador…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">67%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-18</span>
+        <strong>Sistema corporativo de gestão e comunicação de impacto</strong>
+        <small>Implementar um sistema corporativo integrado de gestão e comunicação de impacto, fundamentado em ferramentas de data science e aprendizagem reflexiva, para moni…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">93%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">77%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-19</span>
+        <strong>Inteligência de mercado e estudos prospectivos de natureza continuada</strong>
+        <small>Ampliar a capacidade institucional de antecipar demandas, tendências e oportunidades para a agropecuária brasileira a partir de estudos socioeconômicos, prospec…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">80%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">69%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td></tr></tbody></table>
+    </div>
+  </div>
+</div><div class="secao-break">
+  <div class="titulo-cobertura">👥 Humana: Pessoas, Liderança e Cultura</div>
+  <div class="secao">
+    <div class="secao-header oe9v3">
+      <div><span class="secao-badge">OE9 · V3</span></div>
+      <div class="secao-titulo-grupo">
+        <div class="secao-titulo">Humana: Pessoas, Liderança e Cultura</div>
+        <div class="secao-desc">Promover o bem-estar, a inclusão e o desenvolvimento das pessoas, conectando-as à inovação e à atuação colaborativa da Embrapa.</div>
+      </div>
+    </div>
+    <div class="tabela-container">
+    <table><thead>
+      <tr>
+        <th rowspan="2" class="col-di" style="text-align:left;vertical-align:middle;">Desafio de Inovação (DI)</th>
+        <th colspan="15" class="criterio-header criterio-oe">Critério 1 — Objetivos Específicos do PDE</th>
+        <th class="sep-col" rowspan="2"></th>
+        <th colspan="13" class="criterio-header criterio-mp">Critério 2 — Macroprocessos Organizacionais</th>
+      </tr><tr><th class="col-oe">Transform. Digital</th><th class="col-oe">Valoriz. Pessoas</th><th class="col-oe">Plataformas Colab.</th><th class="col-oe">Redes de Inovação</th><th class="col-oe">Parcerias/Negócios</th><th class="col-oe">Racionaliz. Custos</th><th class="col-oe">Relac. Estratégicos</th><th class="col-oe">Conformidade/Rastreab.</th><th class="col-oe">Excelência SP</th><th class="col-oe">Sustentab. Institucional</th><th class="col-oe">Agilidade PD&I</th><th class="col-oe">Melhoria Processos</th><th class="col-oe">Comunicação Inst.</th><th class="col-oe">Captação Ativos</th><th class="col-oe">Fontes Alt. Tesouro</th><th class="col-mp">Negócios e TT</th><th class="col-mp">Gestão Pessoas</th><th class="col-mp">Comunicação/Mkt</th><th class="col-mp">Suprimentos/Log.</th><th class="col-mp">Digital Interno</th><th class="col-mp">Gestão P&D</th><th class="col-mp">Financeiro/Capt.</th><th class="col-mp">Infraestr. Física</th><th class="col-mp">Relações Inst.</th><th class="col-mp">Riscos/Compliance</th><th class="col-mp">Governança/Proc.</th><th class="col-mp">Intel. Estratégica</th><th class="col-mp">Articulação Intern.</th></tr></thead><tbody><tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-20</span>
+        <strong>Gestão do Conhecimento, lições aprendidas e sucessão</strong>
+        <small>Viabilizar programas institucionais de Gestão do Conhecimento, Lições Aprendidas e sucessão, integrando as Unidades via plataformas colaborativas internas e apl…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">73%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-21</span>
+        <strong>Atração de perfis inovadores e reconhecimento por competências</strong>
+        <small>Desenvolver estratégias para atrair perfis inovadores e implementar práticas de reconhecimento e recompensa baseadas em competências e impacto.</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">80%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">62%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-22</span>
+        <strong>Lideranças para gestão colaborativa e identidade corporativa</strong>
+        <small>Formar lideranças para gestão colaborativa em ambientes seguros e fortalecer a identidade corporativa e a cooperação em rede.</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">60%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></span>
+        </div>
+      </td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-23</span>
+        <strong>Política de DEI — Diversidade, Equidade e Inclusão</strong>
+        <small>Viabilizar efetivamente a política de diversidade, equidade e inclusão com ações e indicadores concretos.</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">60%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></span>
+        </div>
+      </td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-24</span>
+        <strong>Programas de lições aprendidas e integração intergeracional</strong>
+        <small>Implementar programas de lições aprendidas, integração intergeracional e sucessão de profissionais-chave.</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">47%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></span>
+        </div>
+      </td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-25</span>
+        <strong>Reestruturação dos modelos de reconhecimento, recompensa e avaliação</strong>
+        <small>Promover a reestruturação dos modelos de reconhecimento e recompensa, de pessoas e equipes, orientados pela aquisição de competências e a geração de impacto.</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">40%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">31%</span></span>
+        </div>
+      </td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-26</span>
+        <strong>Lideranças humanizadas para ambientes psicologicamente seguros e DEI</strong>
+        <small>Fomentar a formação de lideranças para gestão colaborativa em ambientes psicologicamente seguros, e viabilizar a implantação efetiva da política de diversidade,…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">47%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">31%</span></span>
+        </div>
+      </td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-27</span>
+        <strong>Capacitações em competências essenciais e gestão do conhecimento</strong>
+        <small>Viabilizar programas de capacitações em competências essenciais, lições aprendidas, integração intergeracional e sucessão de profissionais-chave.</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">53%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></span>
+        </div>
+      </td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr>
+<tr class="di-row">
+      <td class="col-di">
+        <span class="numero-di">DI-28</span>
+        <strong>Formação de lideranças humanizadas e avaliação por impacto coletivo</strong>
+        <small>Formar lideranças para gestão humanizada e colaborativa em ambientes psicologicamente seguros e reestruturar os modelos de reconhecimento, recompensa e avaliaçã…</small>
+        <div style="margin-top:5px;display:flex;gap:10px;">
+          <span style="font-size:9px;color:#546E7A;">OE: <span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">47%</span></span>
+          <span style="font-size:9px;color:#546E7A;">MP: <span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">31%</span></span>
+        </div>
+      </td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td class="sep-col"></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-lacuna">–</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-sim">✔</span></td><td><span class="cell-lacuna">–</span></td></tr></tbody></table>
+    </div>
+  </div>
+</div><div class="secao-break">
+<div style="background:linear-gradient(135deg,#37474F,#546E7A);color:white;padding:18px 28px;border-radius:12px 12px 0 0;">
+  <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.7;margin-bottom:5px;">Análise Detalhada</div>
+  <div style="font-size:20px;font-weight:800;margin-bottom:5px;">⚠ Lacunas e Grau de Cobertura</div>
+  <div style="font-size:11px;opacity:.85;">DIs com aderência abaixo de 60% · OEs e Macroprocessos com cobertura incompleta · Percentual final de cobertura global dos 28 DIs</div>
+</div>
+<div style="background:white;border-radius:0 0 12px 12px;box-shadow:0 2px 8px rgba(0,0,0,.15);padding:26px;">
+
+<!-- BLOCO 1 -->
+<div style="margin-bottom:32px;">
+  <div style="font-size:14px;font-weight:800;color:#B71C1C;border-bottom:3px solid #EF9A9A;padding-bottom:7px;margin-bottom:14px;">
+    🔴 Bloco 1 — DIs com Aderência Global Abaixo de 60%
+  </div>
+  <p style="font-size:10.5px;color:#546E7A;margin-bottom:12px;line-height:1.6;">
+    Os 13 DIs abaixo apresentam cobertura combinada (OEs + Macroprocessos) inferior a 60%.
+    Para cada um são listados os OEs e Macroprocessos que não possuem qualquer relação temática com o desafio, representando lacunas reais de cobertura.
+    A lógica adotada é <strong>semântica</strong>: qualquer menção ao tema — direta ou indireta — já configura cobertura (✔).
+  </p>
+  <table style="width:100%;border-collapse:collapse;font-size:10px;">
+    <thead><tr style="background:#FFEBEE;">
+      <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #EF9A9A;width:50px;">DI</th>
+      <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #EF9A9A;">Título do Desafio de Inovação</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #EF9A9A;width:75px;">Ader. OE</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #EF9A9A;width:75px;">Ader. MP</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #EF9A9A;width:75px;">Global</th>
+      <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #EF9A9A;">OEs sem cobertura</th>
+      <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #EF9A9A;">Macroprocessos sem cobertura</th>
+    </tr></thead>
+    <tbody><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-25</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Reestruturação dos modelos de reconhecimento, recompensa e avaliação</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">40%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">31%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">36%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Transformação Digital (OE8), Plataformas Colaborativas, Redes de Inovação, Parcerias e Negócios, Relacionamentos Estratégicos, Conformidade e Rastreabilidade, Comunicação Institucional, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Comunicação & Marketing, Suprimentos e Logística, Digital Interno, Infraestrutura Física, Relações Institucionais, Riscos e Compliance, Inteligência Estratégica, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-26</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Lideranças humanizadas para ambientes psicologicamente seguros e DEI</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">47%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">31%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">39%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Transformação Digital (OE8), Redes de Inovação, Parcerias e Negócios, Racionalização de Custos, Relacionamentos Estratégicos, Agilidade em PD&I, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Suprimentos e Logística, Digital Interno, Gestão de P&D, Financeiro / Captação, Infraestrutura Física, Relações Institucionais, Inteligência Estratégica, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-28</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Formação de lideranças humanizadas e avaliação por impacto coletivo</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">47%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">31%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">39%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Transformação Digital (OE8), Redes de Inovação, Parcerias e Negócios, Relacionamentos Estratégicos, Conformidade e Rastreabilidade, Comunicação Institucional, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Comunicação & Marketing, Suprimentos e Logística, Digital Interno, Financeiro / Captação, Infraestrutura Física, Relações Institucionais, Riscos e Compliance, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-24</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Programas de lições aprendidas e integração intergeracional</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">47%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">43%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Transformação Digital (OE8), Redes de Inovação, Parcerias e Negócios, Relacionamentos Estratégicos, Conformidade e Rastreabilidade, Comunicação Institucional, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Comunicação & Marketing, Suprimentos e Logística, Financeiro / Captação, Infraestrutura Física, Relações Institucionais, Riscos e Compliance, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-02</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Modernização da infraestrutura tecnológica e cibersegurança</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">53%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Valorização de Pessoas, Redes de Inovação, Parcerias e Negócios, Relacionamentos Estratégicos, Comunicação Institucional, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Gestão de Pessoas, Comunicação & Marketing, Suprimentos e Logística, Financeiro / Captação, Relações Institucionais, Inteligência Estratégica, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-27</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Capacitações em competências essenciais e gestão do conhecimento</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">53%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Redes de Inovação, Parcerias e Negócios, Relacionamentos Estratégicos, Conformidade e Rastreabilidade, Comunicação Institucional, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Comunicação & Marketing, Suprimentos e Logística, Financeiro / Captação, Infraestrutura Física, Relações Institucionais, Riscos e Compliance, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-08</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Racionalização de custos e aumento de eficiência institucional</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">53%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">50%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Valorização de Pessoas, Plataformas Colaborativas, Redes de Inovação, Parcerias e Negócios, Relacionamentos Estratégicos, Conformidade e Rastreabilidade, Comunicação Institucional</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Gestão de Pessoas, Comunicação & Marketing, Relações Institucionais, Riscos e Compliance, Inteligência Estratégica, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-15</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Aprendizagem Reflexiva e sandboxes organizacionais</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">60%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">50%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Parcerias e Negócios, Relacionamentos Estratégicos, Conformidade e Rastreabilidade, Comunicação Institucional, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Comunicação & Marketing, Suprimentos e Logística, Financeiro / Captação, Infraestrutura Física, Relações Institucionais, Riscos e Compliance, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-04</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Capacidades humanas e digitais para transformação organizacional</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">67%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">54%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Parcerias e Negócios, Relacionamentos Estratégicos, Conformidade e Rastreabilidade, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Comunicação & Marketing, Suprimentos e Logística, Financeiro / Captação, Infraestrutura Física, Relações Institucionais, Riscos e Compliance, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-22</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Lideranças para gestão colaborativa e identidade corporativa</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">60%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">54%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Transformação Digital (OE8), Racionalização de Custos, Relacionamentos Estratégicos, Conformidade e Rastreabilidade, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Suprimentos e Logística, Digital Interno, Financeiro / Captação, Infraestrutura Física, Riscos e Compliance, Inteligência Estratégica, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-23</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Política de DEI — Diversidade, Equidade e Inclusão</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">60%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">54%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Transformação Digital (OE8), Racionalização de Custos, Relacionamentos Estratégicos, Agilidade em PD&I, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Suprimentos e Logística, Digital Interno, Financeiro / Captação, Infraestrutura Física, Inteligência Estratégica, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-17</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Governança flexível e sandboxes para soluções organizacionais</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">67%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">57%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Parcerias e Negócios, Relacionamentos Estratégicos, Comunicação Institucional, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Comunicação & Marketing, Suprimentos e Logística, Financeiro / Captação, Infraestrutura Física, Relações Institucionais, Articulação Internacional</td>
+        </tr><tr style="border-bottom:1px solid #EEE;">
+          <td style="padding:7px 10px;font-weight:800;color:#B71C1C;white-space:nowrap;">DI-20</td>
+          <td style="padding:7px 10px;font-size:9.5px;line-height:1.4;">Gestão do Conhecimento, lições aprendidas e sucessão</td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">73%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">38%</span></td>
+          <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">57%</span></td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Parcerias e Negócios, Relacionamentos Estratégicos, Captação de Receitas de Ativos, Fontes Alternativas ao Tesouro</td>
+          <td style="padding:7px 10px;font-size:9px;color:#546E7A;line-height:1.5;">Negócios e TT, Comunicação & Marketing, Suprimentos e Logística, Financeiro / Captação, Infraestrutura Física, Relações Institucionais, Riscos e Compliance, Articulação Internacional</td>
+        </tr></tbody>
+  </table>
+</div>
+
+<!-- BLOCO 2 -->
+<div style="margin-bottom:32px;">
+  <div style="font-size:14px;font-weight:800;color:#0D47A1;border-bottom:3px solid #90CAF9;padding-bottom:7px;margin-bottom:14px;">
+    📘 Bloco 2 — Aderência por Objetivo Específico do PDE (do menor ao maior)
+  </div>
+  <p style="font-size:10.5px;color:#546E7A;margin-bottom:12px;line-height:1.6;">
+    Percentual = nº de DIs que cobrem o OE ÷ total de DIs (28) × 100. Critério semântico: qualquer abordagem temática conta como cobertura direta (✔).
+    OEs com percentual abaixo de 40% indicam possível necessidade de novos DIs:
+    <strong>Relacionamentos Estratégicos</strong> (25%).
+  </p>
+  <table style="width:100%;border-collapse:collapse;font-size:10px;">
+    <thead><tr style="background:#E3F2FD;">
+      <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #90CAF9;">Objetivo Específico</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #90CAF9;width:65px;">✔ Coberto</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #90CAF9;width:65px;">~ Parcial</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #90CAF9;width:65px;">– Lacuna</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #90CAF9;width:105px;">% Aderência</th>
+      <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #90CAF9;">Cobertura Visual</th>
+    </tr></thead>
+    <tbody><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Relacionamentos Estratégicos</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">7</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">21</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">25%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#EF5350;border-radius:4px;height:9px;width:45px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Captação de Receitas de Ativos</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">12</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">16</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">43%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#FFC107;border-radius:4px;height:9px;width:77px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Fontes Alternativas ao Tesouro</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">12</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">16</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">43%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#FFC107;border-radius:4px;height:9px;width:77px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Parcerias e Negócios</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">13</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">15</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#FFC107;border-radius:4px;height:9px;width:83px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Conformidade e Rastreabilidade</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">14</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">14</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">50%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#FFC107;border-radius:4px;height:9px;width:90px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Transformação Digital (OE8)</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">18</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">10</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">64%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:115px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Valorização de Pessoas</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">19</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">9</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">68%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:122px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Redes de Inovação</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">19</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">9</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">68%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:122px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Comunicação Institucional</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">19</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">9</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">68%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:122px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Racionalização de Custos</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">22</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">6</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">79%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:141px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Plataformas Colaborativas</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">23</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">5</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">82%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:147px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Agilidade em PD&I</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">25</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">3</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">89%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:160px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Excelência no Setor Público</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">28</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">100%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:180px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Sustentabilidade Institucional</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">28</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">100%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:180px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Melhoria de Processos</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">28</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">100%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:180px;"></div></div></td>
+    </tr></tbody>
+  </table>
+</div>
+
+<!-- BLOCO 3 -->
+<div style="margin-bottom:32px;">
+  <div style="font-size:14px;font-weight:800;color:#1B5E20;border-bottom:3px solid #A5D6A7;padding-bottom:7px;margin-bottom:14px;">
+    🏛 Bloco 3 — Aderência por Macroprocesso Organizacional (do menor ao maior)
+  </div>
+  <p style="font-size:10.5px;color:#546E7A;margin-bottom:12px;line-height:1.6;">
+    Mesmo critério semântico. Macroprocessos com percentual abaixo de 40% representam áreas operacionais com cobertura insuficiente pelos DIs atuais:
+    <strong>Infraestrutura Física</strong> (14%); <strong>Suprimentos e Logística</strong> (21%); <strong>Articulação Internacional</strong> (29%).
+  </p>
+  <table style="width:100%;border-collapse:collapse;font-size:10px;">
+    <thead><tr style="background:#E8F5E9;">
+      <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #A5D6A7;">Macroprocesso</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #A5D6A7;width:65px;">✔ Coberto</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #A5D6A7;width:65px;">~ Parcial</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #A5D6A7;width:65px;">– Lacuna</th>
+      <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #A5D6A7;width:105px;">% Aderência</th>
+      <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #A5D6A7;">Cobertura Visual</th>
+    </tr></thead>
+    <tbody><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Infraestrutura Física</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">4</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">24</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">14%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#EF5350;border-radius:4px;height:9px;width:25px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Suprimentos e Logística</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">6</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">22</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">21%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#EF5350;border-radius:4px;height:9px;width:38px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Articulação Internacional</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">8</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">20</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFCDD2;color:#B71C1C;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">29%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#EF5350;border-radius:4px;height:9px;width:51px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Riscos e Compliance</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">13</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">15</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">46%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#FFC107;border-radius:4px;height:9px;width:83px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Comunicação & Marketing</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">14</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">14</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">50%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#FFC107;border-radius:4px;height:9px;width:90px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Negócios e TT</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">15</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">13</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">54%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#FFC107;border-radius:4px;height:9px;width:96px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Financeiro / Captação</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">15</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">13</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">54%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#FFC107;border-radius:4px;height:9px;width:96px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Relações Institucionais</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">15</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">13</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#FFF9C4;color:#F57F17;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">54%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#FFC107;border-radius:4px;height:9px;width:96px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Gestão de Pessoas</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">17</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">11</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">61%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:109px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Digital Interno</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">18</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">10</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">64%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:115px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Inteligência Estratégica</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">20</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">8</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">71%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:128px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Gestão de P&D</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">27</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">1</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">96%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:173px;"></div></div></td>
+    </tr><tr style="border-bottom:1px solid #EEE;">
+      <td style="padding:7px 10px;font-weight:600;">Governança e Processos</td>
+      <td style="padding:7px 10px;text-align:center;color:#2E7D32;font-weight:700;">28</td>
+      <td style="padding:7px 10px;text-align:center;color:#F57F17;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;color:#B71C1C;font-weight:700;">0</td>
+      <td style="padding:7px 10px;text-align:center;"><span style="background:#C8E6C9;color:#1B5E20;font-weight:800;padding:3px 8px;border-radius:5px;font-size:10px;">100%</span></td>
+      <td style="padding:7px 10px;"><div style="background:#E0E0E0;border-radius:4px;height:9px;width:180px;display:inline-block;vertical-align:middle;"><div style="background:#4CAF50;border-radius:4px;height:9px;width:180px;"></div></div></td>
+    </tr></tbody>
+  </table>
+</div>
+
+<!-- BLOCO 4: PAINEL GLOBAL -->
+<div style="background:linear-gradient(135deg,#263238,#37474F);border-radius:12px;padding:24px;color:white;">
+  <div style="font-size:15px;font-weight:800;margin-bottom:18px;">📊 Percentual Final de Cobertura dos 28 Desafios de Inovação</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:18px;align-items:center;">
+    <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Cobertura OEs</div>
+      <div style="font-size:36px;font-weight:900;color:#81D4FA;">68.3%</div>
+      <div style="font-size:9px;opacity:.65;margin-top:3px;">15 Objetivos Específicos</div>
+      <div style="background:rgba(255,255,255,.2);border-radius:4px;height:7px;margin-top:9px;">
+        <div style="background:#81D4FA;border-radius:4px;height:7px;width:68%;"></div></div>
+    </div>
+    <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Cobertura Macroprocessos</div>
+      <div style="font-size:36px;font-weight:900;color:#A5D6A7;">54.9%</div>
+      <div style="font-size:9px;opacity:.65;margin-top:3px;">13 Macroprocessos</div>
+      <div style="background:rgba(255,255,255,.2);border-radius:4px;height:7px;margin-top:9px;">
+        <div style="background:#A5D6A7;border-radius:4px;height:7px;width:54%;"></div></div>
+    </div>
+    <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:16px;text-align:center;border:2px solid rgba(255,255,255,.3);">
+      <div style="font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⭐ Cobertura Global</div>
+      <div style="font-size:40px;font-weight:900;color:#FFE082;">62.1%</div>
+      <div style="font-size:9px;opacity:.65;margin-top:3px;">28 DIs × 28 critérios</div>
+      <div style="background:rgba(255,255,255,.2);border-radius:4px;height:7px;margin-top:9px;">
+        <div style="background:#FFE082;border-radius:4px;height:7px;width:62%;"></div></div>
+    </div>
+    <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:16px;font-size:10.5px;line-height:1.8;color:rgba(255,255,255,.85);">
+      <strong style="display:block;margin-bottom:7px;font-size:11px;color:white;">📋 Interpretação dos Resultados</strong>
+      Com critério semântico, o portfólio de <strong style="color:#FFE082;">28 DIs</strong> alcança cobertura global de
+      <strong style="color:#FFE082;">62.1%</strong>, com aderência de <strong>68.3%</strong> aos OEs e
+      <strong>54.9%</strong> aos Macroprocessos. Três OEs atingem cobertura plena (100%):
+      <em>Excelência no Setor Público</em>, <em>Sustentabilidade Institucional</em> e <em>Melhoria de Processos</em>.
+      As principais lacunas residem no OE <em>Relacionamentos Estratégicos</em> (25%)
+      e nos macroprocessos <em>Infraestrutura Física</em> (14%) e
+      <em>Suprimentos e Logística</em> (21%),
+      que demandam atenção na próxima rodada de construção de DIs.
+    </div>
+  </div>
+</div>
+
+</div></div>
+</div>
+<div class="rodape">Embrapa · PDE · Análise de Cobertura dos Desafios de Inovação · Critério Semântico · Dados: 08/05/2026 · Documento Gerencial Interno</div>
+</body></html>
